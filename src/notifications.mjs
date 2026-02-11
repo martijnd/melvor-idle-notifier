@@ -7,15 +7,22 @@ export class NotificationManager {
   }
 
   init() {
-    // Request browser notification permission early
-    if (
-      this.settings.section("General").get("browser-notifications") &&
-      "Notification" in window
-    ) {
-      Notification.requestPermission().then((perm) => {
-        this.permissionGranted = perm === "granted";
-      });
+    // Permission must be requested from a user gesture (e.g. button click).
+    // Check if we already have permission (e.g. from a previous session).
+    if ("Notification" in window && Notification.permission === "granted") {
+      this.permissionGranted = true;
     }
+  }
+
+  /**
+   * Request browser notification permission. Must be called from a user gesture
+   * (e.g. button click) — browsers block requestPermission() otherwise.
+   */
+  requestNotificationPermission() {
+    if (!("Notification" in window)) return;
+    Notification.requestPermission().then((perm) => {
+      this.permissionGranted = perm === "granted";
+    });
   }
 
   /**

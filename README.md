@@ -4,16 +4,12 @@ Get browser, sound, and in-game notifications for important idle events.
 
 ## Features
 
-- **Combat Death / Idle** — Notify when combat stops (death or no target)
-- **Skill Level Milestones** — Notify on level ups (configurable interval)
-- **Farming Patches Ready** — Notify when a farming patch is ready to harvest
-- **Bank Nearly Full** — Notify when bank slots are almost exhausted
-- **Potion Charges Depleted** — Notify when an active potion runs out
-- **Slayer Task Complete** — Notify when a slayer task is finished
+- **Combat Idle** — Notify when combat stops (death or area cleared, no more enemies)
+- **Skill Idle** — Notify when a skill stops (resource depleted, inventory full, or manual stop)
 
 ## Notification Channels
 
-- **Browser Notifications** — Desktop push notifications
+- **Browser Notifications** — Desktop push notifications. Click "Enable Browser Notifications" in mod settings to grant permission (browsers require a user gesture).
 - **Sound Alerts** — Play a sound when an event triggers
 - **In-Game Toasts** — Show a toast message inside the game UI
 
@@ -39,6 +35,7 @@ melvor-idle-notifier/
 For sound alerts to work, add an `alert.ogg` file to the `assets/` folder. You can use any short notification sound (OGG format). If the file is missing, sound alerts will fail silently.
 
 **Sources for free sounds:**
+
 - [Pixabay Sound Effects](https://pixabay.com/sound-effects/search/alert/)
 - [Freesound.org](https://freesound.org/) — filter by CC0 (public domain)
 
@@ -72,16 +69,11 @@ zip -r ../idle-notifier-v1.0.0.zip .
 4. Upload your `.zip` in the **File Manager** section and assign a version number.
 5. **Subscribe** to your own mod (either in-game or on the mod.io page) and restart the game.
 
-## Important Caveat
-
-The exact class names and method signatures (e.g., `FarmingPlot.grow`, `PotionManager.removeCharges`) may differ between Melvor Idle versions. Use the **Creator Toolkit** or browser DevTools to inspect the actual global classes and their methods if notifications don't fire as expected.
-
 ## Extension Ideas
 
-| Feature | How |
-|--------|-----|
-| **Cooldown / throttle** | Prevent spam by adding a per-event cooldown (e.g., bank alert at most once per minute). Store timestamps in a `Map`. |
-| **Custom alert sound** | Let users pick from multiple sounds via a `dropdown` setting. |
-| **Webhook integration** | POST to a Discord webhook so you get alerts on your phone. |
-| **Offline catch-up** | On `onCharacterLoaded`, check what happened while offline (levels gained, farming patches grown) and show a summary notification. |
-| **Per-skill toggles** | Add a `checkbox-group` setting listing all skills so users pick exactly which ones trigger milestone alerts. |
+| Feature                      | How                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Skill resource depletion** | Patch skills (Mining, Woodcutting, etc.) to notify when a node depletes — requires finding the correct hooks in the game. |
+| **Cooldown / throttle**      | Prevent spam by adding a per-event cooldown (e.g., combat idle at most once per minute).                                  |
+| **Custom alert sound**       | Let users pick from multiple sounds via a `dropdown` setting.                                                             |
+| **Webhook integration**      | POST to a Discord webhook so you get alerts on your phone.                                                                |

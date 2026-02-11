@@ -4,6 +4,7 @@ export async function setup(ctx) {
   const { registerMonitors } = await ctx.loadModule("src/monitors.mjs");
 
   // ── Mod Settings ──────────────────────────────────────
+  const notifier = new NotificationManager(ctx);
   const generalSection = ctx.settings.section("General");
 
   generalSection.add([
@@ -13,6 +14,13 @@ export async function setup(ctx) {
       label: "Browser Notifications",
       hint: "Show desktop push notifications",
       default: true,
+    },
+    {
+      type: "button",
+      name: "request-notification-permission",
+      display: "Enable Browser Notifications",
+      hint: "Click to request permission (required for desktop alerts)",
+      onClick: () => notifier.requestNotificationPermission(),
     },
     {
       type: "switch",
@@ -28,6 +36,13 @@ export async function setup(ctx) {
       hint: "Show a toast message inside the game UI",
       default: true,
     },
+    {
+      type: "switch",
+      name: "only-when-backgrounded",
+      label: "Only when not focused",
+      hint: "Notify when tab is in background or window has lost focus (e.g. switched to another app)",
+      default: true,
+    },
   ]);
 
   const eventsSection = ctx.settings.section("Events");
@@ -35,69 +50,21 @@ export async function setup(ctx) {
   eventsSection.add([
     {
       type: "switch",
-      name: "notify-combat-death",
-      label: "Combat Death / Idle",
-      hint: "Notify when combat stops (death or no target)",
+      name: "notify-combat-idle",
+      label: "Combat Idle",
+      hint: "Notify when combat stops (death or area cleared)",
       default: true,
     },
     {
       type: "switch",
-      name: "notify-skill-milestone",
-      label: "Skill Level Milestones",
-      hint: "Notify on level ups (e.g., every 10 levels)",
-      default: true,
-    },
-    {
-      type: "number",
-      name: "milestone-interval",
-      label: "Milestone Interval",
-      hint: "Notify every N levels (e.g., 5, 10, 25)",
-      default: 10,
-      min: 1,
-      max: 99,
-    },
-    {
-      type: "switch",
-      name: "notify-farming-ready",
-      label: "Farming Patches Ready",
-      hint: "Notify when a farming patch is ready to harvest",
-      default: true,
-    },
-    {
-      type: "switch",
-      name: "notify-bank-full",
-      label: "Bank Nearly Full",
-      hint: "Notify when bank slots are almost exhausted",
-      default: true,
-    },
-    {
-      type: "number",
-      name: "bank-threshold",
-      label: "Bank Full Threshold (%)",
-      hint: "Trigger when bank is this % full",
-      default: 90,
-      min: 50,
-      max: 100,
-    },
-    {
-      type: "switch",
-      name: "notify-potion-expired",
-      label: "Potion Charges Depleted",
-      hint: "Notify when an active potion runs out",
-      default: true,
-    },
-    {
-      type: "switch",
-      name: "notify-task-complete",
-      label: "Slayer Task Complete",
-      hint: "Notify when a slayer task is finished",
+      name: "notify-skill-idle",
+      label: "Skill Idle",
+      hint: "Notify when a skill stops (e.g. resource depleted, inventory full)",
       default: true,
     },
   ]);
 
   // ── Lifecycle: Wait for character + UI ────────────────
-  const notifier = new NotificationManager(ctx);
-
   ctx.onInterfaceReady(() => {
     notifier.init();
     registerMonitors(ctx, notifier);
