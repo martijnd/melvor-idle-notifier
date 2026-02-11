@@ -1,4 +1,4 @@
-const DEBUG = true;
+const DEBUG = false;
 function debug(...args) {
   if (DEBUG) console.log("[Idle Notifier]", ...args);
 }
@@ -7,10 +7,22 @@ export function registerMonitors(ctx, notifier) {
   const events = ctx.settings.section("Events");
   const general = ctx.settings.section("General");
 
+  // Track window focus; document.hidden only covers tab switches, not "clicked another app"
+  let windowFocused = document.hasFocus();
+  window.addEventListener("focus", () => {
+    windowFocused = true;
+  });
+  window.addEventListener("blur", () => {
+    windowFocused = false;
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) windowFocused = false;
+    else windowFocused = document.hasFocus();
+  });
+
   function shouldNotify() {
     if (!general.get("only-when-backgrounded")) return true;
-    // Notify when tab is in background OR window has lost focus (e.g. clicked another app)
-    return document.hidden || !document.hasFocus();
+    return document.hidden || !windowFocused;
   }
 
   debug("Registering monitors...");
