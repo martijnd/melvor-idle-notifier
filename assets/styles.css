@@ -1,0 +1,10 @@
+/* Custom toast styling override for our mod */
+.idle-notifier-toast {
+  border-left: 4px solid #e5c100;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
