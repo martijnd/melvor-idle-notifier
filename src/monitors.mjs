@@ -25,7 +25,26 @@ export function registerMonitors(ctx, notifier) {
     return document.hidden || !windowFocused;
   }
 
-  debug("Registering monitors...");
+  debug("Registering monitors...", CombatManager);
+
+  // Flag set by onPlayerDeath (HP is reset before clearActiveAction runs)
+  let playerJustDied = false;
+
+  // Detect death via onPlayerDeath; clearActiveAction runs after HP is restored
+  try {
+    ctx.patch(CombatManager, "onPlayerDeath").after(function () {
+      if (!events.get("notify-combat-idle") || !shouldNotify()) return;
+      playerJustDied = true;
+      notifier.send(
+        "☠️ You Died!",
+        "Your character died and combat has stopped.",
+        { isDeath: true },
+      );
+    });
+    debug("CombatManager.onPlayerDeath patch registered");
+  } catch (e) {
+    console.warn("[Idle Notifier] onPlayerDeath patch failed:", e.message);
+  }
 
   // Single hook: Game.clearActiveAction is called when ANY action (combat or skill) stops
   try {
@@ -50,13 +69,11 @@ export function registerMonitors(ctx, notifier) {
 
       if (action instanceof CombatManager) {
         if (!events.get("notify-combat-idle")) return;
-        const isDead = this.combat?.player?.hitpoints <= 0;
-        notifier.send(
-          isDead ? "☠️ You Died!" : "⚔️ Combat Stopped",
-          isDead
-            ? "Your character died and combat has stopped."
-            : "You are no longer in combat.",
-        );
+        if (playerJustDied) {
+          playerJustDied = false;
+          return; // Already notified via onPlayerDeath
+        }
+        notifier.send("⚔️ Combat Stopped", "You are no longer in combat.");
       } else {
         // Any non-combat action (Skill, Crafting, etc.)
         if (!events.get("notify-skill-idle")) return;

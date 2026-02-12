@@ -2,7 +2,8 @@ export class NotificationManager {
   constructor(ctx) {
     this.ctx = ctx;
     this.settings = ctx.settings;
-    this.audioUrl = ctx.getResourceUrl("assets/alert.ogg");
+    this.alertUrl = ctx.getResourceUrl("assets/alert.ogg");
+    this.deathUrl = ctx.getResourceUrl("assets/death.ogg");
     this.permissionGranted = false;
   }
 
@@ -29,9 +30,11 @@ export class NotificationManager {
    * Send a notification through all enabled channels.
    * @param {string} title - Short headline
    * @param {string} message - Detail text
+   * @param {{ isDeath?: boolean }} [options] - isDeath: use death sound when player died
    */
-  send(title, message) {
+  send(title, message, options = {}) {
     const general = this.settings.section("General");
+    const isDeath = options.isDeath === true;
 
     // 1. Browser / desktop push notification
     if (general.get("browser-notifications") && this.permissionGranted) {
@@ -41,13 +44,25 @@ export class NotificationManager {
       });
     }
 
-    // 2. Sound alert
+    // 2. Sound alert (different sound for death, fallback to alert.ogg if death.ogg missing)
     if (general.get("sound-alerts")) {
-      const audio = new Audio(this.audioUrl);
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
+      const soundUrl = isDeath ? this.deathUrl : this.alertUrl;
+      const audio = new Audio(soundUrl);
+      audio.volume = isDeath ? 0.7 : 0.5;
+      audio.play().catch(() => {
+        if (isDeath) {
+          const fallback = new Audio(this.alertUrl);
+          fallback.volume = 0.5;
+          fallback.play().catch(() => {});
+        }
+      });
     }
 
     // 3. In-game toast (uses Melvor's built-in notification)
+    notifyPlayer(
+      game.attack,
+      `<strong>${title}</strong><br>${message}`,
+      isDeath ? "danger" : "info"
+    );
   }
 }

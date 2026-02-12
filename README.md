@@ -14,7 +14,7 @@ Settings are persisted across sessions using account storage (when the mod is li
 ## Notification Channels
 
 - **Browser Notifications** — Desktop push notifications. Click "Enable Browser Notifications" in mod settings to grant permission (browsers require a user gesture).
-- **Sound Alerts** — Play a sound when an event triggers
+- **Sound Alerts** — Play a sound when an event triggers. Death plays a different sound (`death.ogg`) when the player dies.
 
 ## Project Structure
 
@@ -27,20 +27,19 @@ melvor-idle-notifier/
 │   └── monitors.mjs
 ├── assets/
 │   ├── icon.png
-│   ├── alert.ogg      ← Add your own sound file (optional)
+│   ├── alert.ogg      ← Default notification sound
+│   ├── death.ogg      ← Death sound (optional, falls back to alert.ogg)
 │   └── styles.css
 └── templates/
     └── settings-panel.html
 ```
 
-## Setup: Alert Sound (Optional)
+## Setup: Alert Sounds (Optional)
 
-For sound alerts to work, add an `alert.ogg` file to the `assets/` folder. You can use any short notification sound (OGG format). If the file is missing, sound alerts will fail silently.
+- **alert.ogg** — Default notification sound. Required for skill/combat idle.
+- **death.ogg** — Played when the player dies. If missing, falls back to `alert.ogg`.
 
-**Sources for free sounds:**
-
-- [Pixabay Sound Effects](https://pixabay.com/sound-effects/search/alert/)
-- [Freesound.org](https://freesound.org/) — filter by CC0 (public domain)
+Add OGG audio files to the `assets/` folder. Sources: [Pixabay](https://pixabay.com/sound-effects/search/alert/), [Freesound.org](https://freesound.org/) (filter by CC0).
 
 ## Testing Locally
 
