@@ -1,4 +1,4 @@
-const DEBUG = true;
+const DEBUG = false;
 function debug(...args) {
   if (DEBUG) console.log("[Idle Notifier]", ...args);
 }
@@ -31,11 +31,7 @@ export async function registerEventHandlers(ctx, notifier) {
     ctx.patch(CombatManager, "onPlayerDeath").after(function () {
       if (!events.get("notify-combat-idle") || !shouldNotify()) return;
       playerJustDied = true;
-      notifier.send(
-        "☠️ You Died!",
-        "Your character died and combat has stopped.",
-        { isDeath: true },
-      );
+      notifier.send("☠️ You Died!", "Your character died!", { isDeath: true });
     });
     debug("CombatManager.onPlayerDeath patch registered");
   } catch (e) {
