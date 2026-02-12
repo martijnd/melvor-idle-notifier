@@ -1,7 +1,90 @@
+const STORAGE_KEY = "idleNotifier:settings";
+
+function toBool(v) {
+  if (v === undefined) return undefined;
+  return v === true || v === "true";
+}
+
+function restoreSettings(ctx) {
+  try {
+    let data = ctx.accountStorage.getItem(STORAGE_KEY);
+    if (
+      (!data || typeof data !== "object") &&
+      typeof localStorage !== "undefined"
+    ) {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) data = JSON.parse(raw);
+    }
+    if (!data || typeof data !== "object") return;
+    const general = ctx.settings.section("General");
+    const events = ctx.settings.section("Events");
+    if (data["browser-notifications"] !== undefined)
+      general.set(
+        "browser-notifications",
+        toBool(data["browser-notifications"]) ?? data["browser-notifications"],
+      );
+    if (data["sound-alerts"] !== undefined)
+      general.set(
+        "sound-alerts",
+        toBool(data["sound-alerts"]) ?? data["sound-alerts"],
+      );
+    if (data["in-game-toasts"] !== undefined)
+      general.set(
+        "in-game-toasts",
+        toBool(data["in-game-toasts"]) ?? data["in-game-toasts"],
+      );
+    if (data["only-when-backgrounded"] !== undefined)
+      general.set(
+        "only-when-backgrounded",
+        toBool(data["only-when-backgrounded"]) ??
+          data["only-when-backgrounded"],
+      );
+    if (data["notify-combat-idle"] !== undefined)
+      events.set(
+        "notify-combat-idle",
+        toBool(data["notify-combat-idle"]) ?? data["notify-combat-idle"],
+      );
+    if (data["notify-skill-idle"] !== undefined)
+      events.set(
+        "notify-skill-idle",
+        toBool(data["notify-skill-idle"]) ?? data["notify-skill-idle"],
+      );
+  } catch (e) {
+    console.warn("[Idle Notifier] Failed to restore settings:", e.message);
+  }
+}
+
 export async function setup(ctx) {
   // Load sub-modules
   const { NotificationManager } = await ctx.loadModule("src/notifications.mjs");
   const { registerMonitors } = await ctx.loadModule("src/monitors.mjs");
+
+  const onChangePersist = (name, value) => {
+    console.log("[Idle Notifier] Settings changed:", name, value);
+    persistSettings(name, value);
+  };
+
+  function persistSettings(name, value) {
+    try {
+      const general = ctx.settings.section("General");
+      const events = ctx.settings.section("Events");
+      const data = {
+        "browser-notifications": general.get("browser-notifications"),
+        "sound-alerts": general.get("sound-alerts"),
+        "in-game-toasts": general.get("in-game-toasts"),
+        "only-when-backgrounded": general.get("only-when-backgrounded"),
+        "notify-combat-idle": events.get("notify-combat-idle"),
+        "notify-skill-idle": events.get("notify-skill-idle"),
+        [name]: toBool(value),
+      };
+      ctx.accountStorage.setItem(STORAGE_KEY, data);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn("[Idle Notifier] Failed to persist settings:", e.message);
+    }
+  }
 
   // ── Mod Settings ──────────────────────────────────────
   const notifier = new NotificationManager(ctx);
@@ -14,6 +97,7 @@ export async function setup(ctx) {
       label: "Browser Notifications",
       hint: "Show desktop push notifications",
       default: true,
+      onChange: (value) => onChangePersist("browser-notifications", value),
     },
     {
       type: "button",
@@ -28,6 +112,7 @@ export async function setup(ctx) {
       label: "Sound Alerts",
       hint: "Play a sound when an event triggers",
       default: false,
+      onChange: (value) => onChangePersist("sound-alerts", value),
     },
     {
       type: "switch",
@@ -35,6 +120,7 @@ export async function setup(ctx) {
       label: "In-Game Toasts",
       hint: "Show a toast message inside the game UI",
       default: true,
+      onChange: (value) => onChangePersist("in-game-toasts", value),
     },
     {
       type: "switch",
@@ -42,6 +128,7 @@ export async function setup(ctx) {
       label: "Only when not focused",
       hint: "Notify when tab is in background or window has lost focus (e.g. switched to another app)",
       default: true,
+      onChange: (value) => onChangePersist("only-when-backgrounded", value),
     },
   ]);
 
@@ -54,6 +141,7 @@ export async function setup(ctx) {
       label: "Combat Idle",
       hint: "Notify when combat stops (death or area cleared)",
       default: true,
+      onChange: (value) => onChangePersist("notify-combat-idle", value),
     },
     {
       type: "switch",
@@ -61,11 +149,13 @@ export async function setup(ctx) {
       label: "Skill Idle",
       hint: "Notify when a skill stops (e.g. resource depleted, inventory full)",
       default: true,
+      onChange: (value) => onChangePersist("notify-skill-idle", value),
     },
   ]);
 
   // ── Lifecycle: Wait for character + UI ────────────────
   ctx.onInterfaceReady(() => {
+    restoreSettings(ctx);
     notifier.init();
     registerMonitors(ctx, notifier);
     console.log("[Idle Notifier] Active and monitoring.");

@@ -7,6 +7,10 @@ Get browser, sound, and in-game notifications for important idle events.
 - **Combat Idle** — Notify when combat stops (death or area cleared, no more enemies)
 - **Skill Idle** — Notify when a skill stops (resource depleted, inventory full, or manual stop)
 
+## Settings Persistence
+
+Settings are persisted across sessions using account storage (when the mod is linked to mod.io) and `localStorage` as a fallback in the browser.
+
 ## Notification Channels
 
 - **Browser Notifications** — Desktop push notifications. Click "Enable Browser Notifications" in mod settings to grant permission (browsers require a user gesture).
