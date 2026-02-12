@@ -22,7 +22,6 @@ function restoreSettings(ctx) {
     const settingMap = [
       ["browser-notifications", general],
       ["sound-alerts", general],
-      ["in-game-toasts", general],
       ["only-when-backgrounded", general],
       ["notify-combat-idle", events],
       ["notify-skill-idle", events],
@@ -54,7 +53,6 @@ export async function setup(ctx) {
       const data = {
         "browser-notifications": general.get("browser-notifications"),
         "sound-alerts": general.get("sound-alerts"),
-        "in-game-toasts": general.get("in-game-toasts"),
         "only-when-backgrounded": general.get("only-when-backgrounded"),
         "notify-combat-idle": events.get("notify-combat-idle"),
         "notify-skill-idle": events.get("notify-skill-idle"),
@@ -97,14 +95,6 @@ export async function setup(ctx) {
       hint: "Play a sound when an event triggers",
       default: false,
       onChange: (value) => onChangePersist("sound-alerts", value),
-    },
-    {
-      type: "switch",
-      name: "in-game-toasts",
-      label: "In-Game Toasts",
-      hint: "Show a toast message inside the game UI",
-      default: true,
-      onChange: (value) => onChangePersist("in-game-toasts", value),
     },
     {
       type: "switch",

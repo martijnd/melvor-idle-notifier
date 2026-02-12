@@ -49,12 +49,5 @@ export class NotificationManager {
     }
 
     // 3. In-game toast (uses Melvor's built-in notification)
-    if (general.get("in-game-toasts")) {
-      notifyPlayer(
-        game.attack, // any skill for the icon
-        `<strong>${title}</strong><br>${message}`,
-        "danger"
-      );
-    }
   }
 }

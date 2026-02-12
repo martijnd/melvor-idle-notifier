@@ -15,7 +15,6 @@ Settings are persisted across sessions using account storage (when the mod is li
 
 - **Browser Notifications** — Desktop push notifications. Click "Enable Browser Notifications" in mod settings to grant permission (browsers require a user gesture).
 - **Sound Alerts** — Play a sound when an event triggers
-- **In-Game Toasts** — Show a toast message inside the game UI
 
 ## Project Structure
 
