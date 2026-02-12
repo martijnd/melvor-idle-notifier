@@ -16,39 +16,22 @@ function restoreSettings(ctx) {
       if (raw) data = JSON.parse(raw);
     }
     if (!data || typeof data !== "object") return;
+
     const general = ctx.settings.section("General");
     const events = ctx.settings.section("Events");
-    if (data["browser-notifications"] !== undefined)
-      general.set(
-        "browser-notifications",
-        toBool(data["browser-notifications"]) ?? data["browser-notifications"],
-      );
-    if (data["sound-alerts"] !== undefined)
-      general.set(
-        "sound-alerts",
-        toBool(data["sound-alerts"]) ?? data["sound-alerts"],
-      );
-    if (data["in-game-toasts"] !== undefined)
-      general.set(
-        "in-game-toasts",
-        toBool(data["in-game-toasts"]) ?? data["in-game-toasts"],
-      );
-    if (data["only-when-backgrounded"] !== undefined)
-      general.set(
-        "only-when-backgrounded",
-        toBool(data["only-when-backgrounded"]) ??
-          data["only-when-backgrounded"],
-      );
-    if (data["notify-combat-idle"] !== undefined)
-      events.set(
-        "notify-combat-idle",
-        toBool(data["notify-combat-idle"]) ?? data["notify-combat-idle"],
-      );
-    if (data["notify-skill-idle"] !== undefined)
-      events.set(
-        "notify-skill-idle",
-        toBool(data["notify-skill-idle"]) ?? data["notify-skill-idle"],
-      );
+    const settingMap = [
+      ["browser-notifications", general],
+      ["sound-alerts", general],
+      ["in-game-toasts", general],
+      ["only-when-backgrounded", general],
+      ["notify-combat-idle", events],
+      ["notify-skill-idle", events],
+    ];
+    for (const [key, section] of settingMap) {
+      if (data[key] !== undefined) {
+        section.set(key, toBool(data[key]) ?? data[key]);
+      }
+    }
   } catch (e) {
     console.warn("[Idle Notifier] Failed to restore settings:", e.message);
   }
@@ -102,7 +85,8 @@ export async function setup(ctx) {
     {
       type: "button",
       name: "request-notification-permission",
-      display: "Enable Browser Notifications",
+      label: "Enable Browser Notifications",
+      display: "Grant permission",
       hint: "Click to request permission (required for desktop alerts)",
       onClick: () => notifier.requestNotificationPermission(),
     },
