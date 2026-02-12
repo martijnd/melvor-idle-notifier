@@ -128,10 +128,10 @@ export async function setup(ctx) {
   ]);
 
   // ── Lifecycle: Wait for character + UI ────────────────
-  ctx.onInterfaceReady(() => {
+  ctx.onInterfaceReady(async () => {
     restoreSettings(ctx);
     notifier.init();
-    registerMonitors(ctx, notifier);
+    await registerMonitors(ctx, notifier);
     console.log("[Idle Notifier] Active and monitoring.");
   });
 }

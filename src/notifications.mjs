@@ -44,7 +44,7 @@ export class NotificationManager {
       });
     }
 
-    // 2. Sound alert (different sound for death, fallback to alert.ogg if death.ogg missing)
+    // 2. Sound alert (different sound for death)
     if (general.get("sound-alerts")) {
       const soundUrl = isDeath ? this.deathUrl : this.alertUrl;
       const audio = new Audio(soundUrl);
@@ -57,12 +57,5 @@ export class NotificationManager {
         }
       });
     }
-
-    // 3. In-game toast (uses Melvor's built-in notification)
-    notifyPlayer(
-      game.attack,
-      `<strong>${title}</strong><br>${message}`,
-      isDeath ? "danger" : "info"
-    );
   }
 }
