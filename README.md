@@ -24,7 +24,7 @@ melvor-idle-notifier/
 ├── setup.mjs
 ├── src/
 │   ├── notifications.mjs
-│   └── monitors.mjs
+│   └── event-handlers.mjs
 ├── assets/
 │   ├── icon.png
 │   ├── alert.ogg      ← Default notification sound

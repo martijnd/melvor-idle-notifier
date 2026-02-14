@@ -39,7 +39,9 @@ function restoreSettings(ctx) {
 export async function setup(ctx) {
   // Load sub-modules
   const { NotificationManager } = await ctx.loadModule("src/notifications.mjs");
-  const { registerMonitors } = await ctx.loadModule("src/monitors.mjs");
+  const { registerEventHandlers } = await ctx.loadModule(
+    "src/event-handlers.mjs",
+  );
 
   const onChangePersist = (name, value) => {
     console.log("[Idle Notifier] Settings changed:", name, value);
@@ -131,7 +133,7 @@ export async function setup(ctx) {
   ctx.onInterfaceReady(async () => {
     restoreSettings(ctx);
     notifier.init();
-    await registerMonitors(ctx, notifier);
+    await registerEventHandlers(ctx, notifier);
     console.log("[Idle Notifier] Active and monitoring.");
   });
 }
