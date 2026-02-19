@@ -84,5 +84,41 @@ export async function registerEventHandlers(ctx, notifier) {
     debugWarn("clearActiveAction patch failed:", e.message);
   }
 
+  // Summoning tablets depleted: patch consume events; we're in the callback because consumption happened
+  function checkTabletsDepleted() {
+    if (!events.get("notify-summoning-tablets-depleted") || !shouldNotify())
+      return;
+    const equipped = game?.combat?.player?.equipment?.equippedItems;
+    if (!equipped) return;
+    for (const slotId of ["melvorD:Summon1", "melvorD:Summon2"]) {
+      const slot = equipped[slotId];
+      if (slot && !slot.isEmpty && slot.quantity === 0) {
+        notifier.send(
+          "Summoning Tablets Depleted",
+          "Your equipped summoning tablets have run out.",
+        );
+        return;
+      }
+    }
+  }
+
+  // Patch SummoningSynced consumption (covers combat attacks and skill actions)
+  let tabletPatchRegistered = false;
+  if (typeof SummoningSynced !== "undefined") {
+    for (const method of ["consumeEquippedTablets", "consumeTablet"]) {
+      try {
+        ctx.patch(SummoningSynced, method).after(checkTabletsDepleted);
+        debug(`SummoningSynced.${method} patch registered`);
+        tabletPatchRegistered = true;
+        break;
+      } catch (e) {
+        debugWarn(`SummoningSynced.${method} patch failed:`, e.message);
+      }
+    }
+  }
+  if (!tabletPatchRegistered) {
+    debugWarn("SummoningSynced not found or patch failed; tablet alert disabled.");
+  }
+
   debug("Event handlers registered.");
 }

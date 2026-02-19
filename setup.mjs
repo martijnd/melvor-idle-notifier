@@ -25,6 +25,7 @@ function restoreSettings(ctx) {
       ["only-when-backgrounded", general],
       ["notify-combat-idle", events],
       ["notify-skill-idle", events],
+      ["notify-summoning-tablets-depleted", events],
     ];
     for (const [key, section] of settingMap) {
       if (data[key] !== undefined) {
@@ -58,6 +59,8 @@ export async function setup(ctx) {
         "only-when-backgrounded": general.get("only-when-backgrounded"),
         "notify-combat-idle": events.get("notify-combat-idle"),
         "notify-skill-idle": events.get("notify-skill-idle"),
+        "notify-summoning-tablets-depleted":
+          events.get("notify-summoning-tablets-depleted"),
         [name]: toBool(value),
       };
       ctx.accountStorage.setItem(STORAGE_KEY, data);
@@ -126,6 +129,15 @@ export async function setup(ctx) {
       hint: "Notify when a skill stops (e.g. resource depleted, inventory full)",
       default: true,
       onChange: (value) => onChangePersist("notify-skill-idle", value),
+    },
+    {
+      type: "switch",
+      name: "notify-summoning-tablets-depleted",
+      label: "Summoning Tablets Depleted",
+      hint: "Notify when equipped summoning tablets run out",
+      default: true,
+      onChange: (value) =>
+        onChangePersist("notify-summoning-tablets-depleted", value),
     },
   ]);
 
